@@ -444,6 +444,56 @@ namespace omtplugin
             OBS_COMBO_FORMAT_BOOL,
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public struct obs_video_info
+        {
+            public IntPtr graphics_module;
+            public UInt32 fps_num;
+            public UInt32 fps_den;
+            public UInt32 base_width;
+            public UInt32 base_height;
+            public UInt32 output_width;
+            public UInt32 output_height;
+            public video_format output_format;
+            public UInt32 adapter;
+            public byte gpu_conversion;
+            public video_colorspace colorspace;
+            public video_range_type range;
+            public int scale_type;
+        }
+
+        [DllImport(DLL_PATH)]
+        [return: MarshalAs(UnmanagedType.I1)]
+        public static extern bool obs_get_video_info(ref obs_video_info ovi);
+
+        [DllImport(DLL_PATH)]
+        public static extern IntPtr obs_view_create();
+
+        [DllImport(DLL_PATH)]
+        public static extern void obs_view_destroy(IntPtr view);
+
+        [DllImport(DLL_PATH)]
+        public static extern void obs_view_set_source(IntPtr view, UInt32 channel, IntPtr source);
+
+        [DllImport(DLL_PATH)]
+        public static extern IntPtr obs_view_add2(IntPtr view, ref obs_video_info ovi);
+
+        [DllImport(DLL_PATH)]
+        public static extern void obs_view_remove(IntPtr view);
+
+        [DllImport(DLL_PATH)]
+        public static extern void obs_output_set_media(IntPtr output, IntPtr video, IntPtr audio);
+
+        [DllImport(DLL_PATH_FRONTEND)]
+        public static extern IntPtr obs_frontend_get_current_preview_scene();
+
+        [DllImport(DLL_PATH_FRONTEND)]
+        public static extern IntPtr obs_frontend_get_current_scene();
+
+        [DllImport(DLL_PATH_FRONTEND)]
+        [return: MarshalAs(UnmanagedType.I1)]
+        public static extern bool obs_frontend_preview_program_mode_active();
+
         [DllImport(DLL_PATH_FRONTEND)]
         public static extern void obs_frontend_add_event_callback(IntPtr callback, IntPtr private_data);
 

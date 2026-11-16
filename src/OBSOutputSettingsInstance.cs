@@ -34,6 +34,7 @@ namespace omtplugin
                     OMTLogging.Write("UpdateSettings", "OMTOutput");
                     parent.SaveSettings(settings);
                     OBSOutput.UpdateMainOutput();
+                    OBSPreviewOutput.UpdatePreviewOutput();
                 }
             }
             catch (Exception ex)
@@ -53,6 +54,8 @@ namespace omtplugin
                     OBS.obs_properties_set_flags(properties, OBS.OBS_PROPERTIES_DEFER_UPDATE);
                     IntPtr enabledProperty = OBS.obs_properties_add_bool(properties, "enabledProperty", "Output Enabled");
                     IntPtr nameProperty = OBS.obs_properties_add_text(properties, "nameProperty", "Output Name", 0);
+                    IntPtr previewEnabledProperty = OBS.obs_properties_add_bool(properties, "previewEnabledProperty", "Preview Output Enabled");
+                    IntPtr previewNameProperty = OBS.obs_properties_add_text(properties, "previewNameProperty", "Preview Output Name", 0);
                     OMTLogging.Write("GetProperties", "OMTOutput");
                 }
                 return properties;

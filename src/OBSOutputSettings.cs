@@ -14,6 +14,8 @@ namespace omtplugin
         private IntPtr configPath = IntPtr.Zero;
         private string? name = null;
         private bool enabled = false;
+        private string? previewName = null;
+        private bool previewEnabled = false;
 
         public OBSOutputSettings() 
             : base("omtoutputsettings", "OMT Output Settings", OBS.obs_icon_type.OBS_ICON_TYPE_CAMERA, 
@@ -41,12 +43,15 @@ namespace omtplugin
 
         public string? Name { get { return name; } }
         public bool Enabled {  get { return enabled; } }
+        public string? PreviewName { get { return previewName; } }
+        public bool PreviewEnabled { get { return previewEnabled; } }
 
         protected override void GetDefaults(nint settings)
         {
             if (settings != IntPtr.Zero)
             {
                 OBS.obs_data_set_default_string(settings, "nameProperty", OBSOutput.DEFAULT_OUTPUT_NAME);
+                OBS.obs_data_set_default_string(settings, "previewNameProperty", OBSPreviewOutput.DEFAULT_PREVIEW_NAME);
             }
             base.GetDefaults(settings);
         }
@@ -89,6 +94,16 @@ namespace omtplugin
                 } else
                 {
                     name = "";
+                }
+                previewEnabled = OBS.obs_data_get_bool(settings, "previewEnabledProperty");
+                IntPtr pn = OBS.obs_data_get_string(settings, "previewNameProperty");
+                if (pn != IntPtr.Zero)
+                {
+                    previewName = Marshal.PtrToStringUTF8(pn);
+                }
+                else
+                {
+                    previewName = "";
                 }
                 if (configPath != IntPtr.Zero)
                 {

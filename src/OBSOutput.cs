@@ -255,6 +255,7 @@ namespace omtplugin
                 {
                     DestroyMainOutput();
                 }
+                OBSPreviewOutput.EventCallback(evt);
                 if (evt == OBS.obs_frontend_event.OBS_FRONTEND_EVENT_EXIT)
                 {
                     DestroyFrontEnd();
@@ -277,6 +278,10 @@ namespace omtplugin
             {
                 OBS.obs_register_output_s(ref info, Marshal.SizeOf<OBS.obs_output_info>());
                 CreateOutputSettings();
+                if (outputSettings != null)
+                {
+                    OBSPreviewOutput.Register(outputSettings);
+                }
                 CreateFrontEnd();
             }
             catch (Exception ex)
