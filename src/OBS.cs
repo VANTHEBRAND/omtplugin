@@ -428,6 +428,13 @@ namespace omtplugin
 
         }
 
+        public enum obs_group_type
+        {
+            OBS_GROUP_INVALID,
+            OBS_GROUP_NORMAL,
+            OBS_GROUP_CHECKABLE,
+        }
+
         public enum obs_combo_type
         {
             OBS_COMBO_TYPE_INVALID,
@@ -588,6 +595,10 @@ namespace omtplugin
 
         [DllImport(DLL_PATH)]
         public static extern IntPtr obs_properties_create();
+
+        /// <summary>A boxed group of properties. A checkable group's checkbox is the setting named `name`.</summary>
+        [DllImport(DLL_PATH)]
+        public static extern IntPtr obs_properties_add_group(IntPtr properties, string name, string description, obs_group_type type, IntPtr group);
 
         [DllImport(DLL_PATH)]
         public static extern void obs_properties_set_flags(IntPtr properties, UInt32 flags);

@@ -73,14 +73,19 @@ namespace omtplugin
                 if (properties != IntPtr.Zero)
                 {
                     OBS.obs_properties_set_flags(properties, OBS.OBS_PROPERTIES_DEFER_UPDATE);
-                    IntPtr enabledProperty = OBS.obs_properties_add_bool(properties, "enabledProperty", "Output Enabled");
-                    IntPtr nameProperty = OBS.obs_properties_add_text(properties, "nameProperty", "Output Name", 0);
-                    AddSizeList(properties, "outputHeightProperty", "Output Size");
-                    AddQualityList(properties, "outputQualityProperty", "Output Quality");
-                    IntPtr previewEnabledProperty = OBS.obs_properties_add_bool(properties, "previewEnabledProperty", "Preview Output Enabled");
-                    IntPtr previewNameProperty = OBS.obs_properties_add_text(properties, "previewNameProperty", "Preview Output Name", 0);
-                    AddSizeList(properties, "previewHeightProperty", "Preview Output Size");
-                    AddQualityList(properties, "previewQualityProperty", "Preview Output Quality");
+                    // Two matching boxes, each switched on by the checkbox in its title. The setting
+                    // keys are unchanged, so earlier saved settings still apply.
+                    IntPtr main = OBS.obs_properties_create();
+                    OBS.obs_properties_add_text(main, "nameProperty", "Name", 0);
+                    AddSizeList(main, "outputHeightProperty", "Size");
+                    AddQualityList(main, "outputQualityProperty", "Quality");
+                    OBS.obs_properties_add_group(properties, "enabledProperty", "Main Output", OBS.obs_group_type.OBS_GROUP_CHECKABLE, main);
+
+                    IntPtr preview = OBS.obs_properties_create();
+                    OBS.obs_properties_add_text(preview, "previewNameProperty", "Name", 0);
+                    AddSizeList(preview, "previewHeightProperty", "Size");
+                    AddQualityList(preview, "previewQualityProperty", "Quality");
+                    OBS.obs_properties_add_group(properties, "previewEnabledProperty", "Preview Output", OBS.obs_group_type.OBS_GROUP_CHECKABLE, preview);
                     OMTLogging.Write("GetProperties", "OMTOutput");
                 }
                 return properties;
