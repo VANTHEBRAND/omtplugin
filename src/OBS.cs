@@ -626,5 +626,15 @@ namespace omtplugin
 
         [DllImport(DLL_PATH)]
         public static extern bool obs_data_get_bool(IntPtr data, string name);
+
+        [DllImport(DLL_PATH)]
+        public static extern void obs_data_set_default_int(IntPtr data, string name, long val);
+
+        /// <summary>
+        /// Asks libobs to scale the raw frames delivered to an output that has no encoder. Must be
+        /// called before the output starts.
+        /// </summary>
+        [DllImport(DLL_PATH)]
+        public static extern void obs_output_set_preferred_size(IntPtr output, UInt32 width, UInt32 height);
     }
 }

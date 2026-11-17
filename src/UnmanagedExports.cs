@@ -62,6 +62,11 @@ namespace omtplugin
         [UnmanagedCallersOnly(EntryPoint = "obs_module_load")]
         public static bool ObsModuleLoad()
         {
+            // Mitigation for a crash on macOS where a .NET thread's exit hook runs after the
+            // runtime has already torn down the thread's state (Thread.OnThreadExit faulting
+            // inside EventWaitHandle.Set). Keeping a floor of pool threads alive means idle
+            // workers are not retired after a burst of receiver connections.
+            System.Threading.ThreadPool.SetMinThreads(8, 8);
             LoadLibraries();
             receive = new OBSReceive();
             receive.Register();

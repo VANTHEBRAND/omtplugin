@@ -216,6 +216,11 @@ namespace omtplugin
                 mainInstance = OBS.obs_output_create(OutputIDString, "OMT Output", data, IntPtr.Zero);
                 if (mainInstance != IntPtr.Zero)
                 {
+                    if (outputSettings != null && outputSettings.TryGetScaledSize(out UInt32 scaledWidth, out UInt32 scaledHeight))
+                    {
+                        OBS.obs_output_set_preferred_size(mainInstance, scaledWidth, scaledHeight);
+                        OMTLogging.Write("CreateMainOutput: scaled to " + scaledWidth + "x" + scaledHeight, "OMTOutput");
+                    }
                     OMTLogging.Write("CreateMainOutput: " + OutputIDString + "," + mainInstance, "OMTOutput");
                 }
                 OBS.obs_data_release(data);

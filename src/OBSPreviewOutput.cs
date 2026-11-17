@@ -177,6 +177,13 @@ namespace omtplugin
                         OMTLogging.Write("No video info available", "OMTPreviewOutput");
                         return;
                     }
+                    // The view renders straight to the chosen size, so nothing is scaled afterwards.
+                    if (outputSettings != null && outputSettings.TryGetScaledSize(out UInt32 scaledWidth, out UInt32 scaledHeight))
+                    {
+                        ovi.output_width = scaledWidth;
+                        ovi.output_height = scaledHeight;
+                        OMTLogging.Write("CreatePreviewOutput: rendering at " + scaledWidth + "x" + scaledHeight, "OMTPreviewOutput");
+                    }
                     view = OBS.obs_view_create();
                     if (view == IntPtr.Zero)
                     {

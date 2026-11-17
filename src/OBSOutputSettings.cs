@@ -16,6 +16,7 @@ namespace omtplugin
         private bool enabled = false;
         private string? previewName = null;
         private bool previewEnabled = false;
+        private long outputHeight = 0;
 
         public OBSOutputSettings() 
             : base("omtoutputsettings", "OMT Output Settings", OBS.obs_icon_type.OBS_ICON_TYPE_CAMERA, 
@@ -45,6 +46,27 @@ namespace omtplugin
         public bool Enabled {  get { return enabled; } }
         public string? PreviewName { get { return previewName; } }
         public bool PreviewEnabled { get { return previewEnabled; } }
+        /// <summary>Height in lines that both outputs are scaled to, or 0 for the canvas size.</summary>
+        public long OutputHeight { get { return outputHeight; } }
+
+        /// <summary>
+        /// The size both outputs are scaled to: the chosen height at the canvas aspect ratio,
+        /// rounded to even numbers. Returns false when no scaling is wanted.
+        /// </summary>
+        public bool TryGetScaledSize(out UInt32 width, out UInt32 height)
+        {
+            width = 0;
+            height = 0;
+            if (outputHeight <= 0) return false;
+            OBS.obs_video_info ovi = new OBS.obs_video_info();
+            if (!OBS.obs_get_video_info(ref ovi)) return false;
+            if (ovi.output_width == 0 || ovi.output_height == 0) return false;
+            if (outputHeight >= ovi.output_height) return false;
+            height = (UInt32)outputHeight;
+            double w = (double)ovi.output_width * outputHeight / ovi.output_height;
+            width = (UInt32)(Math.Round(w / 2.0) * 2.0);
+            return width >= 2;
+        }
 
         protected override void GetDefaults(nint settings)
         {
@@ -52,6 +74,7 @@ namespace omtplugin
             {
                 OBS.obs_data_set_default_string(settings, "nameProperty", OBSOutput.DEFAULT_OUTPUT_NAME);
                 OBS.obs_data_set_default_string(settings, "previewNameProperty", OBSPreviewOutput.DEFAULT_PREVIEW_NAME);
+                OBS.obs_data_set_default_int(settings, "outputHeightProperty", 0);
             }
             base.GetDefaults(settings);
         }
@@ -105,6 +128,7 @@ namespace omtplugin
                 {
                     previewName = "";
                 }
+                outputHeight = OBS.obs_data_get_int(settings, "outputHeightProperty");
                 if (configPath != IntPtr.Zero)
                 {
                     OBS.obs_data_save_json(settings, configPath);
