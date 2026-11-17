@@ -630,6 +630,13 @@ namespace omtplugin
         [DllImport(DLL_PATH)]
         public static extern void obs_data_set_default_int(IntPtr data, string name, long val);
 
+        /// <summary>The size of the frames an output receives: the preferred size when one is set, else the video's.</summary>
+        [DllImport(DLL_PATH)]
+        public static extern UInt32 obs_output_get_width(IntPtr output);
+
+        [DllImport(DLL_PATH)]
+        public static extern UInt32 obs_output_get_height(IntPtr output);
+
         /// <summary>
         /// Asks libobs to scale the raw frames delivered to an output that has no encoder. Must be
         /// called before the output starts.

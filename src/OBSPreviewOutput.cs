@@ -374,7 +374,8 @@ namespace omtplugin
                                 name = outputSettings.PreviewName;
                             }
                         }
-                        send = new OMTSend(name, OMTQuality.Default);
+                        // Fixed, for the same reason as the main output.
+                        send = new OMTSend(name, OMTQuality.Medium);
                         OBS.obs_output_begin_data_capture(this.output, 0);
                         return true;
                     }
@@ -400,7 +401,10 @@ namespace omtplugin
                     }
                     if (send != null)
                     {
-                        send.Dispose();
+                        if (!OBSOutput.Exiting)
+                        {
+                            send.Dispose();
+                        }
                         send = null;
                     }
                     if (tempData != IntPtr.Zero)

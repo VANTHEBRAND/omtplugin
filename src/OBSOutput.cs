@@ -248,6 +248,14 @@ namespace omtplugin
             }
         }
 
+        /// <summary>
+        /// True once OBS has announced that it is exiting. The senders are then stopped but not
+        /// disposed: disposing one closes wait handles that its channel threads may still be
+        /// waiting on, which has crashed OBS during shutdown, and the process is about to end.
+        /// </summary>
+        private static volatile bool exiting = false;
+        public static bool Exiting { get { return exiting; } }
+
         private static void EventCallback(OBS.obs_frontend_event evt, IntPtr private_data)
         {
             try
@@ -258,6 +266,10 @@ namespace omtplugin
                 }
                 else if (evt == OBS.obs_frontend_event.OBS_FRONTEND_EVENT_EXIT || evt == OBS.obs_frontend_event.OBS_FRONTEND_EVENT_PROFILE_CHANGING)
                 {
+                    if (evt == OBS.obs_frontend_event.OBS_FRONTEND_EVENT_EXIT)
+                    {
+                        exiting = true;
+                    }
                     DestroyMainOutput();
                 }
                 OBSPreviewOutput.EventCallback(evt);
@@ -344,8 +356,10 @@ namespace omtplugin
                                 videoFrame.Type = OMTFrameType.Video;
                                 audioFrame.Type = OMTFrameType.Audio;
 
-                                videoFrame.Width = (int)OBS.video_output_get_width(video);
-                                videoFrame.Height = (int)OBS.video_output_get_height(video);
+                                // The output's own size, which is the scaled size when Output Size is set;
+                                // the video's size is the canvas and would not match the frames delivered.
+                                videoFrame.Width = (int)OBS.obs_output_get_width(this.output);
+                                videoFrame.Height = (int)OBS.obs_output_get_height(this.output);
                                 videoFrame.FrameRate = (float)OBS.video_output_get_frame_rate(video);
                                 OBS.video_format fmt = OBS.video_output_get_format(video);
 
@@ -411,7 +425,9 @@ namespace omtplugin
                                         name = outputSettings.Name;
                                     }
                                 }      
-                                send = new OMTSend(name, OMTQuality.Default);
+                                // A fixed quality: with Default the sender rebuilds its codec whenever a
+                                // receiver asks for another level, which stalls the video thread mid-stream.
+                                send = new OMTSend(name, OMTQuality.Medium);
 
                                 OBS.obs_output_begin_data_capture(this.output, 0);
                                 return true;
@@ -448,7 +464,10 @@ namespace omtplugin
                     }
                     if (send != null)
                     {
-                        send.Dispose();
+                        if (!Exiting)
+                        {
+                            send.Dispose();
+                        }
                         send = null;
                     }
                     if (tempData != IntPtr.Zero)
