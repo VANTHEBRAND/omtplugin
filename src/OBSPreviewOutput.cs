@@ -374,8 +374,9 @@ namespace omtplugin
                                 name = outputSettings.PreviewName;
                             }
                         }
-                        // Fixed, for the same reason as the main output.
-                        send = new OMTSend(name, OMTQuality.Medium);
+                        // A fixed level from the settings, for the same reason as the main output.
+                        OMTQuality quality = outputSettings != null ? outputSettings.OutputQuality : OMTQuality.Medium;
+                        send = new OMTSend(name, quality);
                         OBS.obs_output_begin_data_capture(this.output, 0);
                         return true;
                     }

@@ -425,9 +425,10 @@ namespace omtplugin
                                         name = outputSettings.Name;
                                     }
                                 }      
-                                // A fixed quality: with Default the sender rebuilds its codec whenever a
-                                // receiver asks for another level, which stalls the video thread mid-stream.
-                                send = new OMTSend(name, OMTQuality.Medium);
+                                // A fixed level from the settings: with Default the sender rebuilds its codec
+                                // whenever a receiver asks for another level, which stalls the video thread.
+                                OMTQuality quality = outputSettings != null ? outputSettings.OutputQuality : OMTQuality.Medium;
+                                send = new OMTSend(name, quality);
 
                                 OBS.obs_output_begin_data_capture(this.output, 0);
                                 return true;

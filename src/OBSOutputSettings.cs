@@ -17,6 +17,7 @@ namespace omtplugin
         private string? previewName = null;
         private bool previewEnabled = false;
         private long outputHeight = 0;
+        private long outputQuality = (long)OMTQuality.Medium;
 
         public OBSOutputSettings() 
             : base("omtoutputsettings", "OMT Output Settings", OBS.obs_icon_type.OBS_ICON_TYPE_CAMERA, 
@@ -50,6 +51,21 @@ namespace omtplugin
         public long OutputHeight { get { return outputHeight; } }
 
         /// <summary>
+        /// The codec level both outputs encode at. It is fixed for the life of a sender: with
+        /// OMTQuality.Default the sender would rebuild its codec whenever a receiver asked for
+        /// another level, which stalls the video thread mid-stream.
+        /// </summary>
+        public OMTQuality OutputQuality
+        {
+            get
+            {
+                if (outputQuality == (long)OMTQuality.Low) return OMTQuality.Low;
+                if (outputQuality == (long)OMTQuality.High) return OMTQuality.High;
+                return OMTQuality.Medium;
+            }
+        }
+
+        /// <summary>
         /// The size both outputs are scaled to: the chosen height at the canvas aspect ratio,
         /// rounded to even numbers. Returns false when no scaling is wanted.
         /// </summary>
@@ -75,6 +91,7 @@ namespace omtplugin
                 OBS.obs_data_set_default_string(settings, "nameProperty", OBSOutput.DEFAULT_OUTPUT_NAME);
                 OBS.obs_data_set_default_string(settings, "previewNameProperty", OBSPreviewOutput.DEFAULT_PREVIEW_NAME);
                 OBS.obs_data_set_default_int(settings, "outputHeightProperty", 0);
+                OBS.obs_data_set_default_int(settings, "outputQualityProperty", (long)OMTQuality.Medium);
             }
             base.GetDefaults(settings);
         }
@@ -129,6 +146,7 @@ namespace omtplugin
                     previewName = "";
                 }
                 outputHeight = OBS.obs_data_get_int(settings, "outputHeightProperty");
+                outputQuality = OBS.obs_data_get_int(settings, "outputQualityProperty");
                 if (configPath != IntPtr.Zero)
                 {
                     OBS.obs_data_save_json(settings, configPath);

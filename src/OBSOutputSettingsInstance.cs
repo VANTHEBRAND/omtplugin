@@ -63,6 +63,11 @@ namespace omtplugin
                     OBS.obs_property_list_add_int(sizeProperty, "720 lines (1280x720 at 16:9)", 720);
                     OBS.obs_property_list_add_int(sizeProperty, "540 lines (960x540 at 16:9)", 540);
                     OBS.obs_property_list_add_int(sizeProperty, "360 lines (640x360 at 16:9)", 360);
+                    IntPtr qualityProperty = OBS.obs_properties_add_list(properties, "outputQualityProperty", "Output Quality",
+                        OBS.obs_combo_type.OBS_COMBO_TYPE_LIST, OBS.obs_combo_format.OBS_COMBO_FORMAT_INT);
+                    OBS.obs_property_list_add_int(qualityProperty, "Low", (long)OMTQuality.Low);
+                    OBS.obs_property_list_add_int(qualityProperty, "Medium", (long)OMTQuality.Medium);
+                    OBS.obs_property_list_add_int(qualityProperty, "High", (long)OMTQuality.High);
                     OMTLogging.Write("GetProperties", "OMTOutput");
                 }
                 return properties;
