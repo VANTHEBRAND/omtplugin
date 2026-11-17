@@ -50,7 +50,11 @@ namespace omtplugin
                 OBS.obs_combo_type.OBS_COMBO_TYPE_LIST, OBS.obs_combo_format.OBS_COMBO_FORMAT_INT);
             // The lines are scaled at the aspect ratio of OBS's output resolution, so the sizes in
             // brackets hold for 16:9; a 4K or vertical canvas gets the same lines at its own ratio.
+            // A size at or above the output resolution sends the output resolution: nothing is
+            // scaled up.
             OBS.obs_property_list_add_int(list, "Same as OBS output resolution", 0);
+            OBS.obs_property_list_add_int(list, "2160 lines (3840x2160 at 16:9)", 2160);
+            OBS.obs_property_list_add_int(list, "1440 lines (2560x1440 at 16:9)", 1440);
             OBS.obs_property_list_add_int(list, "1080 lines (1920x1080 at 16:9)", 1080);
             OBS.obs_property_list_add_int(list, "720 lines (1280x720 at 16:9)", 720);
             OBS.obs_property_list_add_int(list, "540 lines (960x540 at 16:9)", 540);
