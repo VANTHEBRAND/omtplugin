@@ -17,7 +17,9 @@ namespace omtplugin
         private string? previewName = null;
         private bool previewEnabled = false;
         private long outputHeight = 0;
-        private long outputQuality = (long)OMTQuality.Medium;
+        private long outputQuality = (long)OMTQuality.Default;
+        private long previewHeight = 0;
+        private long previewQuality = (long)OMTQuality.Default;
 
         public OBSOutputSettings() 
             : base("omtoutputsettings", "OMT Output Settings", OBS.obs_icon_type.OBS_ICON_TYPE_CAMERA, 
@@ -47,39 +49,43 @@ namespace omtplugin
         public bool Enabled {  get { return enabled; } }
         public string? PreviewName { get { return previewName; } }
         public bool PreviewEnabled { get { return previewEnabled; } }
-        /// <summary>Height in lines that both outputs are scaled to, or 0 for the canvas size.</summary>
+        /// <summary>Height in lines the program output is scaled to, or 0 for the canvas size.</summary>
         public long OutputHeight { get { return outputHeight; } }
+        /// <summary>Height in lines the preview output is scaled to, or 0 for the canvas size.</summary>
+        public long PreviewHeight { get { return previewHeight; } }
 
         /// <summary>
-        /// The codec level both outputs encode at. It is fixed for the life of a sender: with
-        /// OMTQuality.Default the sender would rebuild its codec whenever a receiver asked for
-        /// another level, which stalls the video thread mid-stream.
+        /// The codec level the program output encodes at. Default lets the receivers choose:
+        /// the sender then uses the highest level any connected receiver asks for, as the OMT
+        /// protocol intends. A fixed level applies to every receiver.
         /// </summary>
-        public OMTQuality OutputQuality
+        public OMTQuality OutputQuality { get { return ToQuality(outputQuality); } }
+        /// <summary>The same for the preview output.</summary>
+        public OMTQuality PreviewQuality { get { return ToQuality(previewQuality); } }
+
+        private static OMTQuality ToQuality(long value)
         {
-            get
-            {
-                if (outputQuality == (long)OMTQuality.Low) return OMTQuality.Low;
-                if (outputQuality == (long)OMTQuality.High) return OMTQuality.High;
-                return OMTQuality.Medium;
-            }
+            if (value == (long)OMTQuality.Low) return OMTQuality.Low;
+            if (value == (long)OMTQuality.Medium) return OMTQuality.Medium;
+            if (value == (long)OMTQuality.High) return OMTQuality.High;
+            return OMTQuality.Default;
         }
 
         /// <summary>
-        /// The size both outputs are scaled to: the chosen height at the canvas aspect ratio,
-        /// rounded to even numbers. Returns false when no scaling is wanted.
+        /// The size an output is scaled to: the chosen height at the canvas aspect ratio, rounded
+        /// to even numbers. Returns false when no scaling is wanted.
         /// </summary>
-        public bool TryGetScaledSize(out UInt32 width, out UInt32 height)
+        public static bool TryGetScaledSize(long lines, out UInt32 width, out UInt32 height)
         {
             width = 0;
             height = 0;
-            if (outputHeight <= 0) return false;
+            if (lines <= 0) return false;
             OBS.obs_video_info ovi = new OBS.obs_video_info();
             if (!OBS.obs_get_video_info(ref ovi)) return false;
             if (ovi.output_width == 0 || ovi.output_height == 0) return false;
-            if (outputHeight >= ovi.output_height) return false;
-            height = (UInt32)outputHeight;
-            double w = (double)ovi.output_width * outputHeight / ovi.output_height;
+            if (lines >= ovi.output_height) return false;
+            height = (UInt32)lines;
+            double w = (double)ovi.output_width * lines / ovi.output_height;
             width = (UInt32)(Math.Round(w / 2.0) * 2.0);
             return width >= 2;
         }
@@ -91,7 +97,9 @@ namespace omtplugin
                 OBS.obs_data_set_default_string(settings, "nameProperty", OBSOutput.DEFAULT_OUTPUT_NAME);
                 OBS.obs_data_set_default_string(settings, "previewNameProperty", OBSPreviewOutput.DEFAULT_PREVIEW_NAME);
                 OBS.obs_data_set_default_int(settings, "outputHeightProperty", 0);
-                OBS.obs_data_set_default_int(settings, "outputQualityProperty", (long)OMTQuality.Medium);
+                OBS.obs_data_set_default_int(settings, "outputQualityProperty", (long)OMTQuality.Default);
+                OBS.obs_data_set_default_int(settings, "previewHeightProperty", 0);
+                OBS.obs_data_set_default_int(settings, "previewQualityProperty", (long)OMTQuality.Default);
             }
             base.GetDefaults(settings);
         }
@@ -147,6 +155,8 @@ namespace omtplugin
                 }
                 outputHeight = OBS.obs_data_get_int(settings, "outputHeightProperty");
                 outputQuality = OBS.obs_data_get_int(settings, "outputQualityProperty");
+                previewHeight = OBS.obs_data_get_int(settings, "previewHeightProperty");
+                previewQuality = OBS.obs_data_get_int(settings, "previewQualityProperty");
                 if (configPath != IntPtr.Zero)
                 {
                     OBS.obs_data_save_json(settings, configPath);

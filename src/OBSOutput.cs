@@ -216,7 +216,7 @@ namespace omtplugin
                 mainInstance = OBS.obs_output_create(OutputIDString, "OMT Output", data, IntPtr.Zero);
                 if (mainInstance != IntPtr.Zero)
                 {
-                    if (outputSettings != null && outputSettings.TryGetScaledSize(out UInt32 scaledWidth, out UInt32 scaledHeight))
+                    if (outputSettings != null && OBSOutputSettings.TryGetScaledSize(outputSettings.OutputHeight, out UInt32 scaledWidth, out UInt32 scaledHeight))
                     {
                         OBS.obs_output_set_preferred_size(mainInstance, scaledWidth, scaledHeight);
                         OMTLogging.Write("CreateMainOutput: scaled to " + scaledWidth + "x" + scaledHeight, "OMTOutput");
@@ -425,9 +425,8 @@ namespace omtplugin
                                         name = outputSettings.Name;
                                     }
                                 }      
-                                // A fixed level from the settings: with Default the sender rebuilds its codec
-                                // whenever a receiver asks for another level, which stalls the video thread.
-                                OMTQuality quality = outputSettings != null ? outputSettings.OutputQuality : OMTQuality.Medium;
+                                // Default lets receivers ask for a level; a fixed level applies to all of them.
+                                OMTQuality quality = outputSettings != null ? outputSettings.OutputQuality : OMTQuality.Default;
                                 send = new OMTSend(name, quality);
 
                                 OBS.obs_output_begin_data_capture(this.output, 0);

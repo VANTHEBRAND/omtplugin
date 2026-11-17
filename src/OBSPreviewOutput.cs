@@ -178,7 +178,7 @@ namespace omtplugin
                         return;
                     }
                     // The view renders straight to the chosen size, so nothing is scaled afterwards.
-                    if (outputSettings != null && outputSettings.TryGetScaledSize(out UInt32 scaledWidth, out UInt32 scaledHeight))
+                    if (outputSettings != null && OBSOutputSettings.TryGetScaledSize(outputSettings.PreviewHeight, out UInt32 scaledWidth, out UInt32 scaledHeight))
                     {
                         ovi.output_width = scaledWidth;
                         ovi.output_height = scaledHeight;
@@ -374,8 +374,7 @@ namespace omtplugin
                                 name = outputSettings.PreviewName;
                             }
                         }
-                        // A fixed level from the settings, for the same reason as the main output.
-                        OMTQuality quality = outputSettings != null ? outputSettings.OutputQuality : OMTQuality.Medium;
+                        OMTQuality quality = outputSettings != null ? outputSettings.PreviewQuality : OMTQuality.Default;
                         send = new OMTSend(name, quality);
                         OBS.obs_output_begin_data_capture(this.output, 0);
                         return true;
